@@ -1,6 +1,6 @@
-from keras.engine.topology import Layer
-from keras.layers import regularizers, initializers
-import keras.backend as K
+from tensorflow.python.keras.engine import Layer
+from tensorflow.python.keras import regularizers, initializers
+import tensorflow.python.keras.backend as K
 
 
 class MoGLayer(Layer):
