@@ -1,22 +1,22 @@
-import keras
-from keras.layers import Dense, Flatten, MaxPooling2D
-from keras.layers import Reshape, LeakyReLU, Dropout
-from keras.layers.convolutional import Conv2D, UpSampling2D
-from keras.layers.convolutional import Conv2DTranspose
-from keras.layers.core import Activation
-from keras.layers.normalization import BatchNormalization
-from keras.models import Model
+import tensorflow.keras as keras
+from tensorflow.keras.layers import Dense, Flatten, MaxPooling2D
+from tensorflow.keras.layers import Reshape, LeakyReLU, Dropout
+from tensorflow.python.keras.layers.convolutional import Conv2D, UpSampling2D
+from tensorflow.python.keras.layers.convolutional import Conv2DTranspose
+from tensorflow.python.keras.layers.core import Activation
+from tensorflow.python.keras.layers.normalization import BatchNormalization
+from tensorflow.keras.models import Model
 from layers.mog_layer import MoGLayer
-from keras.regularizers import l2
-from keras.initializers import RandomUniform, Constant
+from tensorflow.keras.regularizers import l2
+from tensorflow.keras.initializers import RandomUniform, Constant
 
 
 def generator_model_rgb(noise_dim, feature_dim):
     noise_input = keras.layers.Input(shape=(noise_dim,))
     eeg_input = keras.layers.Input(shape=(feature_dim,)) 
-    x = MoGLayer(kernel_initializer=RandomUniform(minval=-0.2, maxval=0.2),
-                 bias_initializer=RandomUniform(minval=-1.0, maxval=1.0), kernel_regularizer=l2(0.01))(noise_input)
-    x = Dense(feature_dim, activation="tanh")(x)
+    #x = MoGLayer(kernel_initializer=RandomUniform(minval=-0.2, maxval=0.2),
+     #            bias_initializer=RandomUniform(minval=-1.0, maxval=1.0), kernel_regularizer=l2(0.01))(noise_input)
+    x = Dense(feature_dim, activation="tanh")(noise_input)
     x = keras.layers.multiply([x, eeg_input])
     x = BatchNormalization(momentum=0.8)(x)
     x = Dense(512 * 4 * 4, activation="relu")(x)
