@@ -1,12 +1,12 @@
 import logging
 import os
 from random import randint
-from keras import backend as K
+from tensorflow.keras import backend as K
 import random
 from PIL import Image
-from keras.models import load_model
-from keras.optimizers import SGD, Adam
-from keras.utils import to_categorical
+from tensorflow.python.keras.models import load_model
+from tensorflow.keras.optimizers import SGD, Adam
+from tensorflow.keras.utils import to_categorical
 import pickle
 import utils.data_input_util as inutil
 from training.models.thoughtviz import *
@@ -14,11 +14,11 @@ from utils.image_utils import *
 from utils.eval_utils import *
 
 
-def train_gan(input_noise_dim, batch_size, epochs, data_dir, saved_classifier_model_file, model_save_dir, output_dir, classifier_model_file):
+def train_gan(input_noise_dim, batch_size, epochs, saved_classifier_model_file, model_save_dir, output_dir, classifier_model_file, splits_save_dir):
 
     K.set_learning_phase(False)
     # folders containing images used for training
-    imagenet_folder = "./images/ImageNet-Filtered"
+    imagenet_folder = "/content/ThoughtViz/training/images/ImageNet-Filtered"
     num_classes = 10
 
     feature_encoding_dim = 100
@@ -49,8 +49,8 @@ def train_gan(input_noise_dim, batch_size, epochs, data_dir, saved_classifier_mo
 
     g.summary()
     d.summary()
-    
-    eeg_data = pickle.load(open(os.path.join(data_dir, 'data.pkl'), "rb"))
+    print(splits_save_dir)
+    eeg_data = pickle.load(open(os.path.join(splits_save_dir, 'data.pkl'), "rb"), encoding="bytes")
     classifier = load_model(saved_classifier_model_file)
     classifier.summary()
     x_test = eeg_data[b'x_test']
@@ -69,6 +69,7 @@ def train_gan(input_noise_dim, batch_size, epochs, data_dir, saved_classifier_mo
         print("Number of batches", int(x_train.shape[0]/batch_size))
 
         for index in range(int(x_train.shape[0]/batch_size)):
+            print(2)
             # generate noise from a normal distribution
             noise = np.random.uniform(-1, 1, (batch_size, input_noise_dim))
 
@@ -95,6 +96,7 @@ def train_gan(input_noise_dim, batch_size, epochs, data_dir, saved_classifier_mo
             # generator loss
             g_loss = d_on_g.train_on_batch([noise, eeg_feature_vectors], [np.array([1] * batch_size), np.array(one_hot_vectors).reshape(batch_size, num_classes)])
             d.trainable = True
+            print(1)
 
         # save generated images at intermediate stages of training
         if epoch % 100 == 0:
@@ -128,7 +130,7 @@ def train():
     batch_size = 100
     run_id = 1
     epochs = 10000
-    model_save_dir = os.path.join('./saved_models/thoughtviz_image_with_eeg/', dataset, 'run_' + str(run_id))
+    model_save_dir = os.path.join('/saved_models/thoughtviz_image_with_eeg/', dataset, 'run_' + str(run_id))
     if not os.path.exists(model_save_dir):
         os.makedirs(model_save_dir)
 
@@ -136,10 +138,10 @@ def train():
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    classifier_model_file = os.path.join('./trained_classifier_models', 'classifier_' + dataset.lower() + '.h5')
+    classifier_model_file = os.path.join('/content/ThoughtViz/training/trained_classifier_models', 'classifier_' + dataset.lower() + '.h5')
 
-    eeg_data_dir = os.path.join('../data/eeg/', dataset.lower())
-    eeg_classifier_model_file = os.path.join('../models/eeg_models', dataset.lower(), 'run_final.h5')
+    eeg_data_dir = os.path.join('/content/ThoughtViz/data/eeg/', dataset.lower())
+    eeg_classifier_model_file = os.path.join('/content/ThoughtViz/models/eeg_models', dataset.lower(), 'run_final.h5')
 
     train_gan(input_noise_dim=100, batch_size=batch_size, epochs=epochs, splits_save_dir=eeg_data_dir, saved_classifier_model_file=eeg_classifier_model_file, model_save_dir=model_save_dir, output_dir=output_dir, classifier_model_file=classifier_model_file)
 
