@@ -5,8 +5,8 @@ from random import randint
 import PIL
 import numpy as np
 from PIL import Image
-from keras.datasets import mnist
-from keras.utils import to_categorical
+from tensorflow.keras.datasets import mnist
+from tensorflow.keras.utils import to_categorical
 from sklearn.feature_extraction import image
 
 
